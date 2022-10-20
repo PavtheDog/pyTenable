@@ -1,3 +1,8 @@
+This is a modified version of pyTenable missing feature and small tweaks.
+- Added in Tenable Nessus Manager Functionity 
+- Added in Passive Scanner capabilities
+
+
 Welcome to pyTenable's documentation!
 =====================================
 
