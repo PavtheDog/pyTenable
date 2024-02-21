@@ -2,7 +2,7 @@
 Scans
 =====
 
-The following methods allow for interaction into the Tenable.io
+The following methods allow for interaction into the Tenable Vulnerability Management
 :devportal:`scans <scans>` API endpoints.
 
 Methods available on ``tio.scans``:
@@ -320,7 +320,7 @@ class ScansAPI(TIOEndpoint):
         Create dictionary of keys required for scan schedule
 
         Args:
-            scan_id (int): The id of the Scan object in Tenable.io
+            scan_id (int): The id of the Scan object in Tenable Vulnerability Management
             enabled (bool, optional): To enable/disable scan schedule
             frequency (str, optional):
                 The frequency of the rule. The string inputted will be up-cased.
@@ -719,7 +719,7 @@ class ScansAPI(TIOEndpoint):
 
     def history(self, scan_id, limit=None, offset=None, pages=None, sort=None):
         '''
-        Get the scan history of a given scan from Tenable.io.
+        Get the scan history of a given scan from Tenable Vulnerability Management.
 
         :devportal:`scans: history <scans-history>`
 
@@ -824,7 +824,7 @@ class ScansAPI(TIOEndpoint):
             scan_id (int or uuid): The unique identifier for the scan.
             history_id (int, optional):
                 The unique identifier for the instance of the scan.
-            history_uuid (uuid, optional):
+            history_uuid (uuid, optional)
                 The UUID for the instance of the scan.
 
         Returns:
@@ -834,11 +834,16 @@ class ScansAPI(TIOEndpoint):
         Examples:
             Retrieve the latest results:
 
-            >>> results = tio.scans.results(1)
+            >>> results = tio.scans.results(419)
 
-            Retrieve a specific instance of the result set:
+            Retrieve a specific instance of the result set using history_id:
 
-            >>> results = tio.scans.results(1, 1)
+            >>> results = tio.scans.results(419, history_id=15184619)
+
+            Retrieve a specific instance of the result set using history_uuid:
+
+            >>> results = tio.scans.results(419, history_uuid="123e4567-e89b-12d3-a456-426614174000")
+
         '''
         params = dict()
 
@@ -846,8 +851,7 @@ class ScansAPI(TIOEndpoint):
             params['history_id'] = self._check('history_id', history_id, int)
 
         if history_uuid:
-            params['history_uuid'] = self._check(
-                'history_uuid', history_uuid, 'scanner-uuid')
+            params['history_id'] = self._check('history_uuid', history_uuid, "uuid")
 
         return self._api.get('scans/{}'.format(
             scan_id), params=params).json()
@@ -1051,7 +1055,7 @@ class ScansAPI(TIOEndpoint):
 
     def import_scan(self, fobj, folder_id=None, password=None, aggregate=None):
         '''
-        Import a scan report into Tenable.io.
+        Import a scan report into Tenable Vulnerability Management.
 
         :devportal:`scans: import <scans-import>`
 
@@ -1091,11 +1095,11 @@ class ScansAPI(TIOEndpoint):
         if aggregate is None:
             aggregate = True
 
-        # Upload the file to the Tenable.io and store the resulting filename in
+        # Upload the file to the Tenable Vulnerability Management and store the resulting filename in
         # the payload.
         payload['file'] = self._api.files.upload(fobj)
 
-        # make the call to Tenable.io to import and then return the result to
+        # make the call to Tenable Vulnerability Management to import and then return the result to
         # the caller.
         return self._api.post('scans/import', json=payload, params={
             'include_aggregate': int(aggregate)}).json()

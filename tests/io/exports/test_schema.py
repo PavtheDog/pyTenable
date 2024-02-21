@@ -17,6 +17,7 @@ def asset_export():
     Example asset export request
     '''
     return {
+        'last_scan_id': 'd27b3f28-9a36-4127-b63a-3da3801121ec',
         'created_at': 1635798607,
         'deleted_at': 1635798607,
         'first_scan_time': 1635798607,
@@ -36,6 +37,35 @@ def asset_export():
             ('test3', 'val3'),
             ('test3', 'val4')
         ]
+    }
+
+@pytest.fixture
+def asset_export_with_open_ports_true():
+    """
+    Asset export request with open ports set as true.
+    """
+    return {
+        'chunk_size': 1000,
+        'include_open_ports': True
+    }
+
+@pytest.fixture
+def asset_export_with_open_ports_false():
+    """
+    Asset export request with open ports set as false.
+    """
+    return {
+        'chunk_size': 1000,
+        'include_open_ports': False
+    }
+
+@pytest.fixture
+def asset_export_with_out_open_ports():
+    """
+    Asset export request without open ports.
+    """
+    return {
+        'chunk_size': 1000
     }
 
 
@@ -67,6 +97,7 @@ def vuln_export():
         'since': 1635798607,
         'plugin_family': ['Family Name'],
         'plugin_id': [19506, 21745, 66334],
+        'scan_uuid': '992b7204-bde2-d17c-cabf-1191f2f6f56b7f1dbd59e117463c',
         'severity': ['CRITICAL', 'High', 'medium', 'LoW', 'InfO'],
         'state': ['OPENED', 'reopened', 'Fixed'],
         'vpr_score': {
@@ -96,6 +127,7 @@ def test_assetschema(asset_export):
     test_resp = {
         'chunk_size': 1000,
         'filters': {
+            'last_scan_id': 'd27b3f28-9a36-4127-b63a-3da3801121ec',
             'created_at': 1635798607,
             'deleted_at': 1635798607,
             'first_scan_time': 1635798607,
@@ -160,6 +192,7 @@ def test_vulnerabilityschema(vuln_export):
             'since': 1635798607,
             'plugin_family': ['Family Name'],
             'plugin_id': [19506, 21745, 66334],
+            'scan_uuid': '992b7204-bde2-d17c-cabf-1191f2f6f56b7f1dbd59e117463c',
             'severity': ['critical', 'high', 'medium', 'low', 'info'],
             'state': ['opened', 'reopened', 'fixed'],
             'vpr_score': {
@@ -182,3 +215,32 @@ def test_vulnerabilityschema(vuln_export):
     with pytest.raises(ValidationError):
         vuln_export['new_val'] = 'something'
         schema.load(vuln_export)
+
+    with pytest.raises(ValidationError):
+        vuln_export['scan_uuid'] = 0
+        schema.load(vuln_export)
+
+def test_asset_export_schema_for_open_ports_true(asset_export_with_open_ports_true):
+    """
+    Ensure Asset Export request is correctly formed with include_open_ports set to true.
+    """
+    schema = AssetExportSchema()
+    schema_dump = schema.dump(schema.load(asset_export_with_open_ports_true))
+    assert schema_dump["include_open_ports"] == True
+
+
+def test_asset_export_schema_for_open_ports_false(asset_export_with_open_ports_false):
+    """
+    Ensure Asset Export request is correctly formed with include_open_ports set to false.
+    """
+    schema = AssetExportSchema()
+    schema_dump = schema.dump(schema.load(asset_export_with_open_ports_false))
+    assert schema_dump["include_open_ports"] == False
+
+def test_asset_export_schema_without_open_ports(asset_export_with_out_open_ports):
+    """
+    Ensure Asset Export request is correctly formed without include_open_ports.
+    """
+    schema = AssetExportSchema()
+    schema_dump = schema.dump(schema.load(asset_export_with_out_open_ports))
+    assert "include_open_ports" not in schema_dump
